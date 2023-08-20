@@ -364,6 +364,30 @@ for i = 1, #ni.members do
 end
 ```
 
+## cast
+
+Arguments:
+
+- **spell** `id|string`
+
+Returns: `void`
+
+Casts the specified spell on member.
+
+```lua
+for i = 1, #ni.members do
+	if ni.members[i]:dispel() then
+		return ni.members[i]:cast(988) -- Cast Dispel Magic on ally
+	end
+end
+
+for i = 1, #ni.members do
+	if ni.members[i]:buffstacks("Earth Shield") < 3 then
+		return ni.members[i]:cast("Earth Shield") -- Cast Earth Shield on ally
+	end
+end
+```
+
 ## hpraw
 
 Type:
@@ -476,6 +500,10 @@ Arguments:
 Returns: `boolean`
 
 This functions ensures that a spell can be casted at specific unit. It includes checks such as:
+
+- [`los`](api/members.md#los)
+- [`facing`](api/members.md#facing)
+- `IsSpellInRange`
 
 ```lua
 for i = 1, #ni.members do

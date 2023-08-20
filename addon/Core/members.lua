@@ -20,21 +20,22 @@ local _cache = roster._cache
 local tankTalents, BuildTalents, inspectFrame, DoInspect
 local INSPECT_TIMEOUT = 3; -- If, during this time, we do not obtain the "INSPECT_TALENT_READY" trigger, we skip the unit and increase its INSPECT_DELAY.
 local INSPECT_DELAY = 10;  -- NotifyInspect delay per unit.
-local wotlk = select(4, GetBuildInfo()) == 30300;
+local wotlk = ni.vars.build == 30300 or false;
+local cata = ni.vars.build == 40300 or false;
 local inspect = { unit = "", tainted = false };
 local playerInCombat
 local pGuid
 setmetatable(members, {
 	__call = function(_, ...)
 		local groupType, nRaidMembers, nPartyMembers, subgroup
-		if wotlk then
+		if wotlk or cata then
 			nRaidMembers = GetNumRaidMembers()
 			nPartyMembers = GetNumPartyMembers()
 			groupType = nRaidMembers > 0 and "raid" or "party"
 		else
-			nRaidMembers = GetNumRaidMembers()
-			nPartyMembers = GetNumPartyMembers()
-			groupType = nRaidMembers > 0 and "raid" or "party"
+			nRaidMembers = GetNumGroupMembers()
+			nPartyMembers = nRaidMembers - 1
+			groupType = IsInRaid() and "raid" or "party"
 		end
 		local groupsize = groupType == "raid" and nRaidMembers or nPartyMembers
 		pGuid = UnitGUID("player");
@@ -289,6 +290,11 @@ function memberssetup:create(unit, guid, subgroup)
 	end
 
 	;
+	function o:cast(spell)
+		return ni.spell.cast(spell, o.unit) or true;
+	end
+
+	;
 	function o:hpraw()
 		return UnitHealth(o.unit);
 	end
@@ -452,21 +458,23 @@ function memberssetup:create(unit, guid, subgroup)
 		roster[o.guid].role     = o.role
 
 		playerInCombat          = playerInCombat == nil and UnitAffectingCombat("player") or playerInCombat
-		-- if wotlk and not playerInCombat or o.unit == "player" or (roster[o.guid].lastInspTime == 0 and CheckInteractDistance(o.unit, 1) ~= nil) then
-		-- 	local now = GetTime()
-		-- 	roster[o.guid].spec = roster[o.guid].specName or "None"
-		-- 	if now - roster[o.guid].lastInspTime > INSPECT_DELAY then
-		-- 		if roster[o.guid].role then
-		-- 			roster[o.guid].lastRole = roster[o.guid].role
-		-- 		end
-		-- 		if o.unit == "player" then
-		-- 			BuildTalents("player")
-		-- 			roster[o.guid].lastInspTime = now
-		-- 		else
-		-- 			DoInspect(o.unit)
-		-- 		end
-		-- 	end
-		-- end
+		if wotlk then
+			if not playerInCombat or o.unit == "player" or (roster[o.guid].lastInspTime == 0 and CheckInteractDistance(o.unit, 1) ~= nil) then
+				local now = GetTime()
+				roster[o.guid].spec = roster[o.guid].specName or "None"
+				if now - roster[o.guid].lastInspTime > INSPECT_DELAY then
+					if roster[o.guid].role then
+						roster[o.guid].lastRole = roster[o.guid].role
+					end
+					if o.unit == "player" then
+						BuildTalents("player")
+						roster[o.guid].lastInspTime = now
+					else
+						DoInspect(o.unit)
+					end
+				end
+			end
+		end
 	end
 
 	;
@@ -535,10 +543,9 @@ memberssetup.set = function()
 
 	;
 	function members.average(unit, distance)
-		unit = unit or "player"
-		distance = distance or 40
 		local average = 0;
-		for _, o in ipairs(members.inrange(unit, distance)) do
+		local tbl = members.inrange(unit or "player", distance or 40)
+		for _, o in ipairs(tbl) do
 			average = average + o:hp()
 		end
 		return average / #members;
