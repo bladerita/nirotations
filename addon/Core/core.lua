@@ -164,12 +164,13 @@ if not ni.loaded then
 		ni.lib.CallbackHandler = require(dir.."addon\\core\\libs\\CallbackHandler-1.0.lua");
 		ni.lib.LibDataBroker = require(dir.."addon\\core\\libs\\LibDataBroker-1.1.lua");
 		ni.lib.LibDBIcon = require(dir.."addon\\core\\libs\\LibDBIcon-1.0.lua");
+		ni.listener = require(dir.."addon\\core\\listener.lua");
 		ni.frames, ni.combatlog, ni.delayfor, ni.icdtracker, ni.events = require(dir.."addon\\core\\frames.lua");
+		ni.unit = require(dir.."addon\\core\\unit.lua");
+		ni.player = require(dir.."addon\\core\\player.lua");
 		ni.spell = require(dir.."addon\\core\\spell.lua");
 		ni.power = require(dir.."addon\\core\\power.lua");
 		ni.rune = require(dir.."addon\\core\\rune.lua");
-		ni.unit = require(dir.."addon\\core\\unit.lua");
-		ni.player = require(dir.."addon\\core\\player.lua");
 		ni.healing, ni.tanks = require(dir.."addon\\core\\healing.lua");
 		ni.members = require(dir.."addon\\core\\members.lua");
 		ni.objects, ni.objectmanager = require(dir.."addon\\core\\objectmanager.lua");
@@ -177,6 +178,8 @@ if not ni.loaded then
 		ni.ttd = require(dir.."addon\\core\\timetodie.lua");
 		ni.main = require(dir.."addon\\core\\mainui.lua");
 		ni.GUI = require(dir.."addon\\core\\gui.lua");
+		
+		_ = require(dir.."addon\\core\\utils\\ItemID.lua");
 		
 		local function RandomVariable(length)
 			local res = ""

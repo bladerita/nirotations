@@ -27,13 +27,27 @@ player.runtext = function(text)
 	ni.functions.runtext(text)
 end;
 player.getskillinfo = function(prof)
-    for i = 1, GetNumSkillLines() do
-        local name, _, _, skillRank = GetSkillLineInfo(i)
-        if name == prof then
-            return skillRank;
+    if build >= 40300 then
+        for i = 1, 6 do
+            local skillName, _, skillRank = GetProfessionInfo(i)
+            if skillName == prof then
+                return skillRank;
+            end
+        end
+    else
+		for i = 1, GetNumSkillLines() do
+            local name, _, _, skillRank = GetSkillLineInfo(i)
+            if name == prof then
+                return skillRank;
+            end
         end
     end
     return 0;
+end;
+player.getenchantid = function(slotId)
+	local link = GetInventoryItemLink("player", slotId)
+	local itemId, enchantId = link:match("item:(%d+):(%d+):(%d+):(%d+):(%d+):(%d+)");
+	return enchantId;
 end;
 player.useitem = function(...) --itemid/name[, target]
 	if #{...} > 1 then
@@ -63,7 +77,7 @@ player.hasglyph = function(glyphid)
 		else
 			enabled, _, glyph_id = GetGlyphSocketInfo(slot)
 		end
-		if enabled and glyph_id == id then
+		if enabled and glyph_id == glyphid then
 			return true;
 		end
 	end
@@ -79,6 +93,19 @@ player.hasitemequipped = function(id)
 		end
 	end
 	return false
+end;
+player.hassetequiped = function(tbl, pieces)
+	local count = 0;
+	for i = 1, #tbl do
+		local ids = tbl[i];
+		if IsEquippedItem(ids) then
+			count = count + 1
+			if count >= pieces then
+				return true;
+			end
+		end
+	end
+	return false;
 end;
 player.slotcastable = function(slotnum)
 	if select(1, GetItemSpell(GetInventoryItemID("player", slotnum))) ~= "SpellName0" then
@@ -105,7 +132,15 @@ player.checkslots = function()
 			freeslots = freeslots + #GetContainerFreeSlots(i)
 		end
 	end
-	return freeslots
+	return freeslots;
+end;
+player.cancelbuff = function(spellid)
+	local spellName = GetSpellInfo(spellid);
+	if ni.player.buff(spellid) then
+		ni.functions.callprotected("CancelUnitBuff", "player", spellName)
+		return true;
+	end
+	return false;
 end;
 player.itemicon = function(itemid, width, height)
     return "\124T"..(GetItemIcon(itemid) or select(3, GetSpellInfo(24720)))..":"..(height or 25)..":"..(width or 25).."\124t"	

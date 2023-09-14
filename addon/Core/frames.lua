@@ -1,6 +1,5 @@
 local UnitCanAttack, IsInInstance, select, GetTime, UnitGUID, pairs, GetSpellInfo, random, print, UnitName, GetLocale, rawset, UnitExists, UnitAffectingCombat, IsMounted, UnitIsUnit, UnitCastingInfo, UnitChannelInfo, tremove, unpack, tinsert, type =
-		UnitCanAttack, IsInInstance, select, GetTime, UnitGUID, pairs, GetSpellInfo, random, print, UnitName, GetLocale,
-		rawset,
+UnitCanAttack, IsInInstance, select, GetTime, UnitGUID, pairs, GetSpellInfo, random, print, UnitName, GetLocale, rawset,
 		UnitExists, UnitAffectingCombat, IsMounted, UnitIsUnit, UnitCastingInfo, UnitChannelInfo, tremove, unpack, tinsert,
 		type
 ---DR Tracker
@@ -210,8 +209,7 @@ local function OnKeyHandler(self, keyType, key)
 		end
 	end
 	return result;
-end
-;
+end;
 
 ni.functions.registercallback(keyevents, OnKeyHandler);
 frames.main = CreateFrame("frame");

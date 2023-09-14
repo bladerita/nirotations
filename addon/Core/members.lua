@@ -20,22 +20,21 @@ local _cache = roster._cache
 local tankTalents, BuildTalents, inspectFrame, DoInspect
 local INSPECT_TIMEOUT = 3; -- If, during this time, we do not obtain the "INSPECT_TALENT_READY" trigger, we skip the unit and increase its INSPECT_DELAY.
 local INSPECT_DELAY = 10;  -- NotifyInspect delay per unit.
-local wotlk = ni.vars.build == 30300 or false;
-local cata = ni.vars.build == 40300 or false;
+local wotlk = select(4, GetBuildInfo()) == 30300;
 local inspect = { unit = "", tainted = false };
 local playerInCombat
 local pGuid
 setmetatable(members, {
 	__call = function(_, ...)
 		local groupType, nRaidMembers, nPartyMembers, subgroup
-		if wotlk or cata then
+		if wotlk then
 			nRaidMembers = GetNumRaidMembers()
 			nPartyMembers = GetNumPartyMembers()
 			groupType = nRaidMembers > 0 and "raid" or "party"
 		else
-			nRaidMembers = GetNumGroupMembers()
-			nPartyMembers = nRaidMembers - 1
-			groupType = IsInRaid() and "raid" or "party"
+			nRaidMembers = GetNumRaidMembers()
+			nPartyMembers = GetNumPartyMembers()
+			groupType = nRaidMembers > 0 and "raid" or "party"
 		end
 		local groupsize = groupType == "raid" and nRaidMembers or nPartyMembers
 		pGuid = UnitGUID("player");
@@ -89,9 +88,8 @@ function memberssetup.Do(f, c)
 		end
 		return unpack(res);
 	end
-end
+end;
 
-;
 setmetatable(memberssetup, { __call = function(_, ...) return Do(...) end });
 
 if wotlk then
@@ -196,25 +194,21 @@ function memberssetup:create(unit, guid, subgroup)
 				or (o.class == "DEATHKNIGHT" and o:aura(48263))
 				or (o:aura(57339) or o:aura(57340))
 				or o.role == "TANK" or false;
-	end
+	end;
 
-	;
 	if wotlk then
 		function o:ishealer()
 			return o.role == "HEALER";
-		end
+		end;
 
-		;
 		function o:isdps()
 			return o.role == "MELEE" or o.role == "CASTER";
-		end
+		end;
 
-		;
 		function o:iscaster()
 			return o.role == "CASTER";
-		end
+		end;
 
-		;
 		function o:ismelee()
 			return o.role == "MELEE";
 		end
@@ -228,83 +222,64 @@ function memberssetup:create(unit, guid, subgroup)
 			return x, y, z, r;
 		end
 		return 0, 0, 0, 0;
-	end
+	end;
 
-	;
 	function o:combat()
 		return UnitAffectingCombat(o.unit) == 1;
 	end
 
 	function o:aura(aura)
 		return ni.unit.aura(o.unit, aura);
-	end
+	end;
 
-	;
 	function o:auras(auras)
 		return ni.unit.auras(o.unit, auras);
-	end
+	end;
 
-	;
 	function o:buff(buff, filter)
 		return ni.unit.buff(o.unit, buff, filter) ~= nil;
-	end
+	end;
 
-	;
 	function o:debuff(debuff, filter)
 		return ni.unit.debuff(o.unit, debuff, filter) ~= nil;
-	end
+	end;
 
-	;
 	function o:buffs(str, filter)
 		return ni.unit.buffs(o.unit, str, filter) or false;
-	end
+	end;
 
-	;
 	function o:debuffs(str, filter)
 		return ni.unit.debuffs(o.unit, str, filter) or false;
-	end
+	end;
 
-	;
 	function o:bufftype(str)
 		return ni.unit.bufftype(o.unit, str) or false;
-	end
+	end;
 
-	;
 	function o:debufftype(str)
 		return ni.unit.debufftype(o.unit, str) or false;
-	end
+	end;
 
-	;
 	function o:buffstacks(buff, filter)
 		return ni.unit.buffstacks(o.unit, buff, filter) or 0;
-	end
+	end;
 
-	;
 	function o:debuffstacks(debuff, filter)
 		return ni.unit.debuffstacks(o.unit, debuff, filter) or 0;
-	end
+	end;
 
-	;
 	function o:dispel()
 		return ni.healing.candispel(o.unit) or false;
-	end
+	end;
 
-	;
-	function o:cast(spell)
-		return ni.spell.cast(spell, o.unit) or true;
-	end
-
-	;
 	function o:hpraw()
 		return UnitHealth(o.unit);
-	end
+	end;
 
-	;
 	function o:hpmax()
 		return UnitHealthMax(o.unit);
-	end
+	end;
 
-	;
 	--------------------------------------
 	function o:hp()
 		local hp = o:hpraw() / o:hpmax() * 100;
@@ -322,26 +297,22 @@ function memberssetup:create(unit, guid, subgroup)
 		hp = o:istank() and (hp - 5) or hp;
 		hp = o:dispel() and (hp - 2) or hp;
 		return hp;
-	end
+	end;
 
-	;
 	function o:range()
 		local reqDist = roster[pGuid] and roster[pGuid].class == "PALADIN" and roster[pGuid].role == "HEALER" and 60 or 40
 		local dist = ni.player.distance(o.unit) or 999;
 		return dist < reqDist or false;
-	end
+	end;
 
-	;
 	function o:los()
 		return ni.player.los(o.unit) == true;
-	end
+	end;
 
-	;
 	function o:facing()
 		return ni.player.facing(o.unit) == true;
-	end
+	end;
 
-	;
 	function o:valid(spell, facing, los)
 		local spellid = tonumber(spell)
 		spellid = spellid or ni.spell.id(spell)
@@ -350,14 +321,12 @@ function memberssetup:create(unit, guid, subgroup)
 					and (not facing or o:facing())
 					and (not los or o:los()))
 				or false
-	end
+	end;
 
-	;
 	function o:threat()
 		return ni.unit.threat(o.unit) or false;
-	end
+	end;
 
-	;
 	function o:getRole()
 		if not wotlk then
 			return UnitGroupRolesAssigned(o.unit) or "NONE";
@@ -416,9 +385,8 @@ function memberssetup:create(unit, guid, subgroup)
 
 		roster[o.guid].role = role
 		return role
-	end
+	end;
 
-	;
 	if wotlk then
 		function o:talent(talent) -- Returns the rank of the unit's talent
 			if roster[o.guid] and roster[o.guid].talents then
@@ -458,23 +426,21 @@ function memberssetup:create(unit, guid, subgroup)
 		roster[o.guid].role     = o.role
 
 		playerInCombat          = playerInCombat == nil and UnitAffectingCombat("player") or playerInCombat
-		if wotlk then
-			if not playerInCombat or o.unit == "player" or (roster[o.guid].lastInspTime == 0 and CheckInteractDistance(o.unit, 1) ~= nil) then
-				local now = GetTime()
-				roster[o.guid].spec = roster[o.guid].specName or "None"
-				if now - roster[o.guid].lastInspTime > INSPECT_DELAY then
-					if roster[o.guid].role then
-						roster[o.guid].lastRole = roster[o.guid].role
-					end
-					if o.unit == "player" then
-						BuildTalents("player")
-						roster[o.guid].lastInspTime = now
-					else
-						DoInspect(o.unit)
-					end
-				end
-			end
-		end
+		-- if wotlk and not playerInCombat or o.unit == "player" or (roster[o.guid].lastInspTime == 0 and CheckInteractDistance(o.unit, 1) ~= nil) then
+		-- 	local now = GetTime()
+		-- 	roster[o.guid].spec = roster[o.guid].specName or "None"
+		-- 	if now - roster[o.guid].lastInspTime > INSPECT_DELAY then
+		-- 		if roster[o.guid].role then
+		-- 			roster[o.guid].lastRole = roster[o.guid].role
+		-- 		end
+		-- 		if o.unit == "player" then
+		-- 			BuildTalents("player")
+		-- 			roster[o.guid].lastInspTime = now
+		-- 		else
+		-- 			DoInspect(o.unit)
+		-- 		end
+		-- 	end
+		-- end
 	end
 
 	;
@@ -510,9 +476,8 @@ memberssetup.set = function()
 		for _, o in ipairs(members) do
 			o:updatemember()
 		end
-	end
+	end;
 
-	;
 	function members.reset()
 		ni.C_Timer.After(0, function()
 			wipe(members)
@@ -520,17 +485,15 @@ memberssetup.set = function()
 			wipe(roster)
 			memberssetup.set()
 		end)
-	end
+	end;
 
-	;
 	function members.sort()
 		if #members > 1 then
 			sort(members, function(a, b) return a:range() and not b:range() or a:range() == b:range() and a:hp() < b:hp() end)
 		end
 		return members;
-	end
+	end;
 
-	;
 	function members.below(percent)
 		local total = 0;
 		for _, o in ipairs(members) do
@@ -539,19 +502,16 @@ memberssetup.set = function()
 			end
 		end
 		return total;
-	end
+	end;
 
-	;
 	function members.average(unit, distance)
 		local average = 0;
-		local tbl = members.inrange(unit or "player", distance or 40)
-		for _, o in ipairs(tbl) do
+		for _, o in ipairs(members.inrange(unit, distance)) do
 			average = average + o:hp()
 		end
 		return average / #members;
-	end
+	end;
 
-	;
 	function members.averageof(count, unit, distance)
 		if not count or count <= 0 then return 0 end
 		unit = unit or "player"
@@ -565,9 +525,8 @@ memberssetup.set = function()
 			end
 		end
 		return n > 0 and average / n or 0;
-	end
+	end;
 
-	;
 	function members.inrange(unit, distance)
 		local tmp = {};
 		if type(unit) ~= "string" then return tmp end
@@ -580,9 +539,8 @@ memberssetup.set = function()
 			end
 		end
 		return tmp;
-	end
+	end;
 
-	;
 	function members.inrangebelow(unit, distance, hp)
 		local tmp = {};
 		for _, o in ipairs(members.inrange(unit, distance)) do
@@ -597,9 +555,8 @@ memberssetup.set = function()
 			sort(tmp, function(a, b) return a.aux < b.aux end)
 		end
 		return tmp;
-	end
+	end;
 
-	;
 	function members.inrangewithbuff(unit, distance, buff, filter)
 		local tmp = {};
 		for _, o in ipairs(members.inrange(unit, distance)) do
@@ -608,9 +565,8 @@ memberssetup.set = function()
 			end
 		end
 		return tmp;
-	end
+	end;
 
-	;
 	function members.inrangewithdebufftype(unit, distance, str)
 		local tmp = {};
 		for _, o in ipairs(members.inrange(unit, distance)) do
@@ -619,9 +575,8 @@ memberssetup.set = function()
 			end
 		end
 		return tmp;
-	end
+	end;
 
-	;
 	function members.inrangewithbufftype(unit, distance, str)
 		local tmp = {};
 		for _, o in ipairs(members.inrange(unit, distance)) do
@@ -630,9 +585,8 @@ memberssetup.set = function()
 			end
 		end
 		return tmp;
-	end
+	end;
 
-	;
 	function members.inrangewithoutbuff(unit, distance, buff, filter)
 		local tmp = {};
 		for _, o in ipairs(members.inrange(unit, distance)) do
@@ -641,9 +595,8 @@ memberssetup.set = function()
 			end
 		end
 		return tmp;
-	end
+	end;
 
-	;
 	function members.inrangewithbuffbelow(unit, distance, buff, hp, filter)
 		local tmp = {};
 		for _, o in ipairs(members.inrangebelow(unit, distance, hp)) do
@@ -652,9 +605,8 @@ memberssetup.set = function()
 			end
 		end
 		return tmp;
-	end
+	end;
 
-	;
 	function members.inrangewithoutbuffbelow(unit, distance, buff, hp, filter)
 		local tmp = {};
 		for _, o in ipairs(members.inrangebelow(unit, distance, hp)) do
@@ -663,9 +615,8 @@ memberssetup.set = function()
 			end
 		end
 		return tmp;
-	end
+	end;
 
-	;
 	function members.inrangewithdebuff(unit, distance, debuff, filter)
 		local tmp = {};
 		for _, o in ipairs(members.inrange(unit, distance)) do
@@ -674,9 +625,8 @@ memberssetup.set = function()
 			end
 		end
 		return tmp;
-	end
+	end;
 
-	;
 	function members.inrangewithdebuffbelow(unit, distance, debuff, hp, filter)
 		local tmp = {};
 		for _, o in ipairs(members.inrangebelow(unit, distance, hp)) do
@@ -685,9 +635,8 @@ memberssetup.set = function()
 			end
 		end
 		return tmp;
-	end
+	end;
 
-	;
 	function members.inrangewithoutdebuff(unit, distance, debuff, filter)
 		local tmp = {};
 		for _, o in ipairs(members.inrange(unit, distance)) do
@@ -696,9 +645,8 @@ memberssetup.set = function()
 			end
 		end
 		return tmp;
-	end
+	end;
 
-	;
 	function members.inrangewithoutdebuffbelow(unit, distance, debuff, hp, filter)
 		local tmp = {};
 		for _, o in ipairs(members.inrangebelow(unit, distance, hp)) do
@@ -707,9 +655,8 @@ memberssetup.set = function()
 			end
 		end
 		return tmp;
-	end
+	end;
 
-	;
 	function members.tsubgroup()
 		local temp = {};
 		for _, o in ipairs(members) do
@@ -755,9 +702,8 @@ memberssetup.set = function()
 		else
 			return 0
 		end
-	end
+	end;
 
-	;
 	function members.addcustom(unit, guid)
 		if type(unit) == "string" then
 			local groupMember = memberssetup:create(unit, guid or UnitGUID(unit));
@@ -766,9 +712,8 @@ memberssetup.set = function()
 				members:updatemembers()
 			end
 		end
-	end
+	end;
 
-	;
 	function members.removecustom(unit)
 		if type(unit) == "string" then
 			for i, o in ipairs(members) do
