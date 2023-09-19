@@ -708,7 +708,6 @@ if wotlk then
 					and GetComboPoints("player", "target") == 5
 					and Cache.savagertimer >= 8
 					and Cache.riptimer >= 10 then
-				print("peo")
 				ni.spell.cast(spells.FerociusBite.id)
 			end
 		end,
