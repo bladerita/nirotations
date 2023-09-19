@@ -270,7 +270,7 @@ if wotlk then
 
 	SLASH_STOPGASTING1          = "/stopgasting"
 	SlashCmdList["STOPGASTING"] = function()
-		ni.rotation.delay(1.5)
+		ni.rotation.delay(1)
 	end
 
 
