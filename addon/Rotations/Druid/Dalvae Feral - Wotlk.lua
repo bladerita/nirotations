@@ -934,11 +934,12 @@ end
 -- TOdO
 -----------------------------------------------------------------
 --Gui
+-- Mejorar el shred behind, todavia hay bosses donde lanza mangle
+-- Mejorar el clearcasting, hay errores cuando hay 5 puntos de combo
+-- Crear la rotacion de Burst y GG
 -- Mejorar Feral Charge, hacer un interrupter
 -- Auto matar snakes.
 -- Auto sacar venenos cuando este en 50% o menos
--- Auto cyclone focus.
 -- Tranquility
--- Fully automated rotation
 --
 --
