@@ -80,6 +80,7 @@ if wotlk then
 		["Interrupts"] = true,
 		["CycloneInterupt"] = true,
 		["CycloneFocus"] = true,
+		["Bombs"] = true,
 
 	}
 	local values = {
@@ -121,6 +122,7 @@ if wotlk then
 		{
 			type = "separator",
 		},
+		{ type = "page", number = 1, text = "General Settings" },
 		{
 			type = "entry",
 			text = "\124T" .. select(3, GetSpellInfo(spells.CatForm.id)) .. ":26:26\124t Auto Cat form",
@@ -143,9 +145,6 @@ if wotlk then
 			key = "CCBuff"
 		},
 		{
-			type = "separator",
-		},
-		{
 			type = "entry",
 			text = "|cFFFF0000\124T" ..
 					select(3, GetSpellInfo(spells.FerociusBite.id)) .. ":26:26\124t Full Automated rotation|r",
@@ -153,6 +152,18 @@ if wotlk then
 			enabled = enables["Automated"],
 			key = "Automated"
 		},
+		{
+			type = "entry",
+			text = "|cFFFF0000\124T" ..
+					GetItemIcon(42641) .. ":26:26\124t Use Bomb|r",
+			tooltip = "It will use Bombs on CD!",
+			enabled = enables["Bombs"],
+			key = "Bombs"
+		},
+		{
+			type = "separator",
+		},
+		{ type = "page", number = 2, text = "Pvp Setting" },
 
 		{
 			type = "entry",
@@ -246,7 +257,8 @@ if wotlk then
 		else
 			ni.player.lookat("target")
 			if ni.unit.isbehind("player", "target")
-					and GetComboPoints("player", "target") < 5
+					and (GetComboPoints("player", "target") < 5
+						or ni.player.buff(spells.ClearCast.id))
 			then
 				ni.spell.cast(spells.Shred.id)
 				ni.player.lookat("target")
@@ -324,6 +336,7 @@ if wotlk then
 		"Barkskin",
 		"Survival",
 		"Tigers Fury",
+		"Bombs",
 		"Interrupter",
 		"FeralCharge",
 		"Berserkfear",
@@ -690,6 +703,28 @@ if wotlk then
 				end
 			end
 		end,
+
+		["Bombs"] = function()
+			if enables["Bombs"]
+			then
+				if ni.player.hasitem(42641) --Sapper
+						and ni.player.itemcd(42641) == 0
+				then
+					if ni.unit.inmelee(p, t)
+					then
+						ni.player.useitem(42641)
+					end
+				else
+					if ni.player.hasitem(41119) --Sarobomb
+							and ni.player.itemcd(41119) == 0
+					then
+						ni.player.useitem(41119)
+						ni.player.clickat(t)
+					end
+				end
+			end
+		end,
+
 		["Berserkfear"] = function()
 			if enables["BerserkFear"] then
 				local fears = { 10890, 20511, 6215, 17928 }
@@ -778,7 +813,8 @@ if wotlk then
 		["Shredauto"] = function()
 			if enables["Automated"] then
 				if ni.player.buff(spells.CatForm.id)
-						and GetComboPoints("player", "target") < 5 then
+						and GetComboPoints("player", "target") < 5
+				then
 					if ni.unit.isbehind("player", "target")
 					-- and IsUsableSpell(spells.Shred.id)
 					then
@@ -803,14 +839,16 @@ if wotlk then
 			end
 		end,
 		["Ingrediente Secreto"] = function()
-			if cat then
-				if ni.spell.available(spells.SavageRoar.id)
-						and GetComboPoints("player", "target") >= 2
-						and ni.unit.buffremaining("player", spells.SavageRoar.id, "player") <= 6 -- this is savage
-						and ni.unit.debuffremaining("target", spells.Rip.id, "player") <= 8 -- this is rip
-						and ni.unit.debuffremaining("target", spells.Rip.id, "player") >= 4 then -- rip
-					ni.spell.cast(spells.SavageRoar.id, "target")
-					return true;
+			if enables["Automated"] then
+				if cat then
+					if ni.spell.available(spells.SavageRoar.id)
+							and GetComboPoints("player", "target") >= 2
+							and ni.unit.buffremaining("player", spells.SavageRoar.id, "player") <= 6 -- this is savage
+							and ni.unit.debuffremaining("target", spells.Rip.id, "player") <= 8 -- this is rip
+							and ni.unit.debuffremaining("target", spells.Rip.id, "player") >= 4 then -- rip
+						ni.spell.cast(spells.SavageRoar.id, "target")
+						return true;
+					end
 				end
 			end
 		end,
