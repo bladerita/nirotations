@@ -886,7 +886,7 @@ if wotlk then
 				local enemies = ni.unit.enemiesinrange("player", 8)
 				if ni.player.buff(spells.BearForm.id)
 						and ni.player.power("rage") > 10
-						and #enemies > 3
+						and #enemies > 2
 				then
 					ni.spell.cast(spells.SwipeBear.id)
 				end
