@@ -854,15 +854,16 @@ if wotlk then
 		end,
 		["WILD"] = function()
 			if enables["CCBuff"] then
-				if ni.spell.available("48470")
+				if ni.spell.available(48470)
 						and ni.player.power(3) < 20
 						and ni.spell.cd(spells.TigersFury.id) > 3
 						and not ni.unit.buff("player", "53909", "player")
 						and not ni.unit.buff("player", "54758", "player")
 						and not ni.unit.buff("player", "16870", "player")
 						and GetComboPoints("player", "target") < 5
-						and ni.player.power(0) >= 40 then
-					ni.spell.cast("48470")
+						and ni.player.power("mana") >= 40
+				then
+					ni.spell.cast(48470)
 					ni.player.runtext("/stopattack")
 					return true;
 				end
