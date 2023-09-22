@@ -1,5 +1,6 @@
 local UnitCanAttack, IsInInstance, select, GetTime, UnitGUID, pairs, GetSpellInfo, random, print, UnitName, GetLocale, rawset, UnitExists, UnitAffectingCombat, IsMounted, UnitIsUnit, UnitCastingInfo, UnitChannelInfo, tremove, unpack, tinsert, type =
-UnitCanAttack, IsInInstance, select, GetTime, UnitGUID, pairs, GetSpellInfo, random, print, UnitName, GetLocale, rawset,
+		UnitCanAttack, IsInInstance, select, GetTime, UnitGUID, pairs, GetSpellInfo, random, print, UnitName, GetLocale,
+		rawset,
 		UnitExists, UnitAffectingCombat, IsMounted, UnitIsUnit, UnitCastingInfo, UnitChannelInfo, tremove, unpack, tinsert,
 		type
 ---DR Tracker
@@ -357,7 +358,7 @@ frames.OnUpdate = function(self, elapsed)
 			if UnitExists(ni.vars.units.follow) or ni.objectmanager.contains(ni.vars.units.follow) then
 				local unit = ni.vars.units.follow;
 				local uGUID = UnitGUID(unit) or ni.objectmanager.objectGUID(unit);
-				local mtime = ranvalue(1, 2);
+				local mtime = math.random(0.2, 0.5)
 				local followTar = nil;
 				local distance = nil;
 
@@ -365,6 +366,7 @@ frames.OnUpdate = function(self, elapsed)
 					local oTar = select(6, ni.unit.info(uGUID))
 					if oTar ~= nil then
 						followTar = oTar
+						ni.player.lookat(oTar)
 					end
 				end
 
