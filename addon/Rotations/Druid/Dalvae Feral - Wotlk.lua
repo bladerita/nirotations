@@ -264,7 +264,7 @@ if wotlk then
 				ni.player.lookat("target")
 			elseif not ni.unit.isbehind("player", "target")
 					and GetComboPoints("player", "target") < 5
-					and ni.player.powerraw("energy") >= 45 then
+					and ni.player:powerraw("energy") >= 45 then
 				ni.player.lookat("target")
 				ni.spell.cast(spells.Manglecat.id, "target")
 			end
@@ -273,10 +273,15 @@ if wotlk then
 
 	SLASH_CHARGE1               = "/charge"
 	SlashCmdList["CHARGE"]      = function(msg)
-		if ni.spell.cd(spells.Charge.id) == 0 then
-			ni.player.runtext("/cast [noform:1] Dire Bear Form")
-			ni.player.lookat("mouseover")
-			ni.player.runtext("/cast [@mouseover,harm,nodead][]Feral Charge - Bear()")
+		if ni.spell.cd(spells.Charge.id) == 0
+		then
+			if not ni.player.buff(spells.BearForm.id)
+			then
+				ni.spell.cast(spells.BearForm.id)
+			else
+				ni.player.lookat("mouseover")
+				ni.spell.cast(spells.Charge.id, "mouseover")
+			end
 		end
 	end
 
@@ -325,6 +330,7 @@ if wotlk then
 	local queue = {
 		--buffs
 		"Cache",
+		"Test",
 		"GOTW",
 		"Thorns",
 		"Pounce",
@@ -344,7 +350,6 @@ if wotlk then
 		"Cycloneinterupt",
 		"CycloneFocus",
 		"Swipe",
-		"Faerie fire",
 		"Antislow",
 		"DispelHEX",
 		"AbolishPoison",
@@ -352,6 +357,7 @@ if wotlk then
 		"Ferocious Bite1",
 		"Ferocious Bite2",
 		"Shreadcc",
+		"Faerie fire",
 		"WILD",
 		"Shred100",
 		"SavageRoar",
@@ -509,7 +515,7 @@ if wotlk then
 		["Shred100"] = function()
 			if Cache.cat
 					and ni.spell.available(spells.Shred.id)
-					and ni.player.powerraw("energy") >= 99
+					and ni.player:powerraw("energy") >= 99
 					and riptimer >= 3
 					and ni.unit.isbehind("player", "target")
 			then
@@ -529,7 +535,7 @@ if wotlk then
 			if ni.player.buff(spells.CatForm.id)
 					and ni.spell.available(spells.FaerieFire.id)
 					and not ni.unit.buff("target", spells.FaerieFire.id, "player")
-					and ni.player.power() < 17 then
+					and ni.player:power() < 17 then
 				ni.spell.cast(spells.FaerieFire.id, "target")
 				return true;
 			end
@@ -820,7 +826,7 @@ if wotlk then
 					then
 						ni.spell.cast(spells.Shred.id, "target")
 					elseif ni.spell.available(spells.Manglecat.id)
-							and ni.player.powerraw("energy") >= 50
+							and ni.player:powerraw("energy") >= 50
 					then
 						ni.spell.cast(spells.Manglecat.id, "target")
 					end
@@ -852,14 +858,25 @@ if wotlk then
 				end
 			end
 		end,
-		["WILD"] = function()
+
+		["Test"] = function()
 			if enables["CCBuff"] then
 				if ni.spell.available(48470)
-						and ni.player.power(3) < 20
+						-- and ni.player:power(3) < 20 -- energy
+						and ni.player.power("mana") > 40 -- mana
+				then
+					print("cholo")
+				end
+			end
+		end,
+		["WILD"] = function()
+			if enables["CCBuff"] then
+				if ni.player.hasitem(44605) -- Reagent
+						and ni.player:power(3) < 20
 						and ni.spell.cd(spells.TigersFury.id) > 3
-						and not ni.unit.buff("player", "53909", "player")
-						and not ni.unit.buff("player", "54758", "player")
-						and not ni.unit.buff("player", "16870", "player")
+						and not ni.player.buff("player", "53909", "player")
+						and not ni.player.buff("player", "54758", "player")
+						and not ni.player.buff("player", "16870", "player")
 						and GetComboPoints("player", "target") < 5
 						and ni.player.power("mana") >= 40
 				then
@@ -885,7 +902,7 @@ if wotlk then
 			if ni.vars.combat.aoe then
 				local enemies = ni.unit.enemiesinrange("player", 8)
 				if ni.player.buff(spells.BearForm.id)
-						and ni.player.power("rage") > 10
+						and ni.player:power("rage") > 10
 						and #enemies > 2
 				then
 					ni.spell.cast(spells.SwipeBear.id)
@@ -926,7 +943,7 @@ if wotlk then
 		["Maul"] = function()
 			if Cache.bear
 					and ni.spell.available(spells.Maul.id)
-					and ni.player.power("rage") > 50
+					and ni.player:power("rage") > 50
 					and not IsCurrentSpell(spells.Maul.id)
 			then
 				ni.spell.cast(spells.Maul.id)
