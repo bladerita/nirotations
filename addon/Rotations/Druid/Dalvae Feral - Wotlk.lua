@@ -330,7 +330,7 @@ if wotlk then
 	local queue = {
 		--buffs
 		"Cache",
-		"Test",
+		-- "Test",
 		"GOTW",
 		"Thorns",
 		"Pounce",
@@ -362,7 +362,7 @@ if wotlk then
 		"Shred100",
 		"SavageRoar",
 		"Ingrediente Secreto",
-		"MangleDebuff",
+		-- "MangleDebuff",
 		"Rake",
 		"Shredauto",
 		"Rip",
@@ -534,8 +534,10 @@ if wotlk then
 		["Faerie fire"] = function()
 			if ni.player.buff(spells.CatForm.id)
 					and ni.spell.available(spells.FaerieFire.id)
-					and not ni.unit.buff("target", spells.FaerieFire.id, "player")
-					and ni.player:power() < 17 then
+					and not ni.unit.debuff(t, spells.FaerieFire.id)
+					and ni.player:power() < 17
+			then
+				print("fuego ferico")
 				ni.spell.cast(spells.FaerieFire.id, "target")
 				return true;
 			end
@@ -703,7 +705,7 @@ if wotlk then
 			if ni.vars.combat.aoe then
 				local enemies = ni.unit.enemiesinrange("player", 8)
 				if ni.player.buff(spells.CatForm.id)
-						and ni.player.buff(spells.SavageRoar.id)
+						and Cache.savagertimer > 2
 						and #enemies >= 3 then
 					ni.spell.cast(62078)
 				end
@@ -837,7 +839,7 @@ if wotlk then
 		["SavageRoar"] = function()
 			if enables["Automated"] then
 				if ni.player.buff(spells.CatForm.id)
-						and not ni.player.buff(spells.SavageRoar.id)
+						and Cache.savagertimer == 0
 						and GetComboPoints("player", "target") > 1
 				then
 					ni.spell.cast(spells.SavageRoar.id, "target")
@@ -849,7 +851,7 @@ if wotlk then
 				if cat then
 					if ni.spell.available(spells.SavageRoar.id)
 							and GetComboPoints("player", "target") >= 2
-							and ni.unit.buffremaining("player", spells.SavageRoar.id, "player") <= 6 -- this is savage
+							and Cache.savagertimer <= 6                                       -- this is savage
 							and ni.unit.debuffremaining("target", spells.Rip.id, "player") <= 8 -- this is rip
 							and ni.unit.debuffremaining("target", spells.Rip.id, "player") >= 4 then -- rip
 						ni.spell.cast(spells.SavageRoar.id, "target")
@@ -872,16 +874,19 @@ if wotlk then
 		["WILD"] = function()
 			if enables["CCBuff"] then
 				if ni.player.hasitem(44605) -- Reagent
-						and ni.player:power(3) < 20
-						and ni.spell.cd(spells.TigersFury.id) > 3
-						and not ni.player.buff("player", "53909", "player")
-						and not ni.player.buff("player", "54758", "player")
-						and not ni.player.buff("player", "16870", "player")
-						and GetComboPoints("player", "target") < 5
+						and ni.spell.available(spells.CatForm.id)
+						and ni.player:power(3) < 30
+						and ni.spell.cd(spells.TigersFury.id) > 2
+						and not ni.player.buff(53909)
+						and not ni.player.buff(54758)
+						and not ni.player.buff(50334, "EXACT") --Berserk
+						and not ni.player.buff(16870)    -- Clear casting
+						-- and GetComboPoints("player", "target") < 5
 						and ni.player.power("mana") >= 40
 				then
-					ni.spell.cast(48470)
-					ni.player.runtext("/stopattack")
+					ni.spell.cast(spells.CatForm.id)
+					-- print("Shapshift")
+					-- ni.player.runtext("/stopattack")
 					return true;
 				end
 			end
