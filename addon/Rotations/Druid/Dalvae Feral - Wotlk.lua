@@ -330,13 +330,13 @@ if wotlk then
 	local queue = {
 		--buffs
 		"Cache",
-		"Test",
+		-- "Test",
 		"GOTW",
 		"Thorns",
 		"Pounce",
 		"INVI",
-		"Catform",
 		"Pause Rotation",
+		"Catform",
 		"Start Attack",
 		"Auto Target",
 		"Barkskin",
@@ -362,7 +362,7 @@ if wotlk then
 		"Shred100",
 		"SavageRoar",
 		"Ingrediente Secreto",
-		"MangleDebuff",
+		-- "MangleDebuff",
 		"Rake",
 		"Shredauto",
 		"Rip",
@@ -534,7 +534,7 @@ if wotlk then
 		["Faerie fire"] = function()
 			if ni.player.buff(spells.CatForm.id)
 					and ni.spell.available(spells.FaerieFire.id)
-					and not ni.unit.buff("target", spells.FaerieFire.id, "player")
+					and not ni.unit.buff("target", spells.FaerieFire.id)
 					and ni.player:power() < 17 then
 				ni.spell.cast(spells.FaerieFire.id, "target")
 				return true;
