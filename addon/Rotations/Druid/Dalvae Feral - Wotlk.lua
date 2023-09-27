@@ -330,7 +330,7 @@ if wotlk then
 	local queue = {
 		--buffs
 		"Cache",
-		"Test",
+		-- "Test",
 		"GOTW",
 		"Thorns",
 		"Pounce",
@@ -442,6 +442,7 @@ if wotlk then
 					end
 				else
 					if not Cache.cat
+							and not Cache.bear
 							and ni.player.hp() > 85
 					then
 						ni.spell.cast(spells.CatForm.id)
@@ -861,20 +862,20 @@ if wotlk then
 			end
 		end,
 
-		["Test"] = function()
-			if enables["CCBuff"] then
-				if ni.spell.available(48470)
-						-- and ni.player:power(3) < 20 -- energy
-						and ni.player.power("mana") > 40 -- mana
-				then
-					print("cholo")
-				end
-			end
-		end,
+		-- ["Test"] = function()
+		-- 	if enables["CCBuff"] then
+		-- 		if ni.spell.available(48470)
+		-- 				-- and ni.player:power(3) < 20 -- energy
+		-- 				and ni.player.power("mana") > 40 -- mana
+		-- 		then
+		-- 			print("cholo")
+		-- 		end
+		-- 	end
+		-- end,
 		["WILD"] = function()
 			if enables["CCBuff"] then
-				if ni.player.hasitem(44605) -- Reagent
-						and ni.spell.available(spells.CatForm.id)
+				if ni.spell.available(spells.CatForm.id)
+						-- and not ni.spell.gcd()	
 						and ni.player:power(3) < 30
 						and ni.spell.cd(spells.TigersFury.id) > 2
 						and not ni.player.buff(53909)
@@ -884,7 +885,8 @@ if wotlk then
 						-- and GetComboPoints("player", "target") < 5
 						and ni.player.power("mana") >= 40
 				then
-					ni.spell.cast(spells.CatForm.id)
+					ni.player.runtext("/use !cat form")
+					-- ni.spell.cast(spells.CatForm.id)
 					-- print("Shapshift")
 					-- ni.player.runtext("/stopattack")
 					return true;
