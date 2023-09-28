@@ -208,7 +208,7 @@ if wotlk then
 		["UnstableAffliction"] = function()
 			if not cache.moving
 					and ni.spell.available(spells.unstableaffliction.id)
-					and not ni.spell.lastcast(spells.unstableaffliction.id, 3)
+					and not ni.spell.lastcast(spells.unstableaffliction.id)
 					and ni.unit.debuffremaining(t, spells.unstableaffliction.id, p) < 1
 					and not DoubleCast(spells.unstableaffliction.name, t)
 			then
@@ -245,9 +245,9 @@ if wotlk then
 			if not cache.moving
 					and ni.spell.available(spells.shadowbolt.id)
 					and (ni.unit.debuffremaining(t, spells.haunt.id, p) > 1
-						or ni.spell.lastcast(spells.haunt.id, 2))
+						or ni.spell.lastcast(spells.haunt.id))
 					and (ni.unit.debuffremaining(t, spells.unstableaffliction.id, p) > 1
-						or ni.spell.lastcast(spells.unstableaffliction.id, 2))
+						or ni.spell.lastcast(spells.unstableaffliction.id))
 			then
 				FacingLosCast(spells.shadowbolt.name, t)
 			end
