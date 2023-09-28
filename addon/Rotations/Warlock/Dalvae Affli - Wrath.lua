@@ -45,26 +45,27 @@ if wotlk then
 
 	}
 
-	local lastSpell, lastGuid, lastTime = "", "", 0
+
+	local lastSpell, lastTarget = "", ""
+
+	local function DoubleCast(spell, tar)
+		if lastSpell == spell
+				and lastTarget == UnitGUID(tar) then
+			return true
+		end
+		return false
+	end
+
 	local function FacingLosCast(spell, tar)
 		if ni.player.isfacing(tar, 145) and ni.player.los(tar) and IsSpellInRange(spell, tar) == 1 then
 			ni.spell.cast(spell, tar)
-			ni.debug.log(string.format("Casting %s on %s", spell, tar))
 			lastSpell = spell
-			lastGuid = UnitGUID(tar)
-			lastTime = GetTime()
+			lastTarget = UnitGUID(tar)
 			return true
 		end
 		return false
 	end
-	local function DoubleCast(spell, tar)
-		if (lastSpell == spell)
-				and lastGuid == tar
-				and GetTime() - lastTime < 2 then
-			return true
-		end
-		return false
-	end
+
 
 	local function ValidUsable(id, tar)
 		if ni.spell.available(id) and ni.spell.valid(tar, id, true, true) then
@@ -169,18 +170,35 @@ if wotlk then
 		["SeedAOE"] = function()
 			if ni.vars.combat.aoe then
 				if #cache.targets > 3 then
-					for k, v in ipairs(cache.targets) do
-						-- if ni.player.threat(v.guid) ~= -1 then
-						if not ni.unit.debuff(v.guid, spells.seed.id, p)
-								and not DoubleCast(spells.seed.name, v.guid)
+					for i = 1, #cache.targets do
+						local target = cache.targets[i]
+						-- if ni.player.threat(target.guid) ~= -1 then
+						if not DoubleCast(spells.seed.name, target.guid)
+								and not ni.unit.debuff(target.guid, spells.seed.id, p)
 						then
-							FacingLosCast(spells.seed.name, v.guid)
-							print(spells.seed.name .. " " .. v.name)
+							FacingLosCast(spells.seed.name, target.guid)
+							-- print(spells.seed.name .. " " .. target.name)
 						end
 					end
 				end
 			end
 		end,
+
+
+		["Haunt"] = function()
+			if ni.spell.available(spells.haunt)
+					and not DoubleCast(spells.haunt.name, t)
+			then
+				FacingLosCast(spells.haunt.name, t)
+			end
+		end,
+		["ShadowBolt"] = function()
+			if not DoubleCast(spells.shadowbolt.name, t)
+			then
+				FacingLosCast(spells.shadowbolt.name, t)
+			end
+		end,
+
 
 	}
 	ni.bootstrap.profile("Dalvae Affli - Wrath", queue, abilities, onload, onunload)
