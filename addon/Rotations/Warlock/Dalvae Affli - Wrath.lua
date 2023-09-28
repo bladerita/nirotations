@@ -18,7 +18,8 @@ if wotlk then
 		shadowflame = { id = 61290, name = GetSpellInfo(61290), icon = select(3, GetSpellInfo(61290)) },
 		shadowbolt = { id = 47809, name = GetSpellInfo(47809), icon = select(3, GetSpellInfo(47809)) },
 		createhealthstone = { id = 47878, name = GetSpellInfo(47878), icon = select(3, GetSpellInfo(47878)) },
-
+		unstableaffliction = { id = 47843, name = GetSpellInfo(47843), icon = select(3, GetSpellInfo(47843)) },
+		agony = { id = 47864, name = GetSpellInfo(47864), icon = select(3, GetSpellInfo(47864)) },
 	}
 	local queue = {
 		"Cache",
@@ -32,10 +33,11 @@ if wotlk then
 		"lifetapbuff",
 		"SeedAOE",
 		"CorruptionAOE",
-		"UnstableAffliction", -- Only one target
 		"Haunt",
-		"Doom",
+		"UnstableAffliction", -- Only one target
+		-- "Doom",
 		"Agony",
+		"Corruption",
 		"DrainSoul",
 		"ShadowBolt",
 		"Lifetap",
@@ -169,11 +171,13 @@ if wotlk then
 		end,
 		["SeedAOE"] = function()
 			if ni.vars.combat.aoe then
-				if #cache.targets > 3 then
+				if #cache.targets > 3
+						and not cache.moving then
 					for i = 1, #cache.targets do
 						local target = cache.targets[i]
 						-- if ni.player.threat(target.guid) ~= -1 then
-						if not DoubleCast(spells.seed.name, target.guid)
+						if not DoubleCast(spells.seed.name, target.name)
+								and ni.spell.available(spells.seed.id)
 								and not ni.unit.debuff(target.guid, spells.seed.id, p)
 						then
 							FacingLosCast(spells.seed.name, target.guid)
@@ -183,22 +187,84 @@ if wotlk then
 				end
 			end
 		end,
-
-
+		["CorruptionAOE"] = function()
+			if ni.vars.combat.aoe then
+				if #cache.targets > 1
+						and #cache.targets < 4 then
+					for i = 1, #cache.targets do
+						local target = cache.targets[i]
+						-- if ni.player.threat(target.guid) ~= -1 then
+						if not DoubleCast(spells.corruption.name, target.name)
+								and ni.spell.available(spells.corruption.id)
+								and not ni.unit.debuff(target.guid, spells.corruption.id, p)
+						then
+							FacingLosCast(spells.corruption.name, target.guid)
+							-- print(spells.seed.name .. " " .. target.name)
+						end
+					end
+				end
+			end
+		end,
+		["UnstableAffliction"] = function()
+			if not cache.moving
+					and ni.spell.available(spells.unstableaffliction.id)
+					and not ni.spell.lastcast(spells.unstableaffliction.id, 3)
+					and ni.unit.debuffremaining(t, spells.unstableaffliction.id, p) < 1
+					and not DoubleCast(spells.unstableaffliction.name, t)
+			then
+				FacingLosCast(spells.unstableaffliction.name, t)
+			end
+		end,
 		["Haunt"] = function()
-			if ni.spell.available(spells.haunt)
-					and not DoubleCast(spells.haunt.name, t)
+			if not cache.moving
+					-- and ni.spell.available(spells.haunt.id)
+					-- and not ni.spell.lastcast(spells.haunt.id, 3)
+					and ni.spell.cd(spells.haunt.id) == 0
+					and ni.unit.debuffremaining(t, spells.haunt.id, p) < 1
+			-- and not DoubleCast(spells.haunt.name, t)
 			then
 				FacingLosCast(spells.haunt.name, t)
 			end
 		end,
+		["Agony"] = function()
+			if ni.spell.available(spells.agony.id)
+					and not ni.unit.debuff(t, spells.agony.id, p)
+					and not DoubleCast(spells.agony.name, t)
+			then
+				FacingLosCast(spells.agony.name, t)
+			end
+		end,
+		["Corruption"] = function()
+			if not ni.unit.debuff(t, spells.corruption.id, p)
+			then
+				FacingLosCast(spells.corruption.name, t)
+			end
+		end,
+
 		["ShadowBolt"] = function()
-			if not DoubleCast(spells.shadowbolt.name, t)
+			if not cache.moving
+					and ni.spell.available(spells.shadowbolt.id)
+					and (ni.unit.debuffremaining(t, spells.haunt.id, p) > 1
+						or ni.spell.lastcast(spells.haunt.id, 2))
+					and (ni.unit.debuffremaining(t, spells.unstableaffliction.id, p) > 1
+						or ni.spell.lastcast(spells.unstableaffliction.id, 2))
 			then
 				FacingLosCast(spells.shadowbolt.name, t)
 			end
 		end,
-
+		["Lifetap"] = function()
+			if ni.player.power() < 7
+					and ni.player.hp() > 20
+			then
+				ni.spell.cast(spells.lifetap.id)
+			else
+				if ni.player.power() < 90
+						and cache.moving
+				then
+					ni.spell.cast(spells.lifetap.id)
+				end
+			end
+		end
 
 	}
 	ni.bootstrap.profile("Dalvae Affli - Wrath", queue, abilities, onload, onunload)
