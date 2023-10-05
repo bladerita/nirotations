@@ -517,7 +517,7 @@ if wotlk then
 			if Cache.cat
 					and ni.spell.available(spells.Shred.id)
 					and ni.player:powerraw("energy") >= 99
-					and riptimer >= 3
+					and Cache.riptimer >= 3
 					and ni.unit.isbehind("player", "target")
 			then
 				ni.spell.cast(spells.Shred.id)
@@ -527,7 +527,7 @@ if wotlk then
 		["Tigers Fury"] = function()
 			if cat
 					and ni.spell.cd(spells.TigersFury.id) == 0
-					and ni.player.power() < 35 then
+					and ni.player:power() < 35 then
 				ni.spell.cast(spells.TigersFury.id)
 			end
 		end,
@@ -897,7 +897,7 @@ if wotlk then
 		["Rip"] = function()
 			if enables["Automated"] then
 				if ni.player.buff(spells.CatForm.id)
-						and not ni.unit.debuff("target", spells.Rip.id)
+						and Cache.riptimer < 1
 						and GetComboPoints("player", "target") > 4
 				then
 					ni.spell.cast(spells.Rip.id, "target")
