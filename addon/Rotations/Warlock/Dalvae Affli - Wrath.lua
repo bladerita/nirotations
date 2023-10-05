@@ -31,7 +31,7 @@ if wotlk then
 		"Pause",
 		"Soulshatter",
 		"lifetapbuff",
-		"SeedAOE",
+
 		"CorruptionAOE",
 		"Haunt",
 		"UnstableAffliction", -- Only one target
@@ -42,10 +42,49 @@ if wotlk then
 		"ShadowBolt",
 		"Lifetap",
 	}
+	local queue2 = {
+		"SeedAOE",
+		"Lifetap",
+	}
 
 	local enemies = {
 
 	}
+	local enables = {
+
+		["seedaoe"] = false,
+		["corruptionaoe"] = false,
+	}
+	local function onload()
+		print("Rotation \124cFF15E615Dalvae pve")
+	end
+
+	local function onunload()
+		print("Rotation \124cFFE61515stopped!")
+	end
+	-- Slashcommands
+	SLASH_SEEDAOE1 = "/SEEDAOE"
+	SlashCmdList["SEEDAOE"] = function(msg)
+		if enables["seedaoe"] then
+			enables["seedaoe"] = false
+			print("\124cFFE61515Seed aoe off\124r")
+		else
+			enables["seedaoe"] = true
+			print("\124cFF00FF00Seed aoe on\124r")
+		end
+	end
+
+	SLASH_CORRUPTIONAOE1 = "/CORRUPTIONAOE"
+	SlashCmdList["CORRUPTIONAOE"] = function(msg)
+		if enables["corruptionaoe"] then
+			enables["corruptionaoe"] = false
+			print("\124cFFE61515Corruption aoe off\124r")
+		else
+			enables["corruptionaoe"] = true
+			print("\124cFF00FF00Corruption aoe on\124r")
+		end
+	end
+
 
 
 	local lastSpell, lastTarget = "", ""
@@ -141,17 +180,25 @@ if wotlk then
 			if IsMounted()
 					or UnitIsDeadOrGhost(p)
 					or not UnitExists(t)
-					and not UnitAffectingCombat(p)
+					or not UnitAffectingCombat("player")
 					or UnitIsDeadOrGhost(t)
 					or (UnitExists(t) and not UnitCanAttack(p, t))
-			then
-				return true
-			end
-			if UnitChannelInfo(p) == spells.drainsoul.name
+					or UnitChannelInfo(p) == spells.drainsoul.name
 			then
 				return true
 			end
 		end,
+
+
+		-- ["Pause Rotation"] = function()
+		-- 	if IsMounted()
+		-- 			or UnitIsDeadOrGhost("player")
+		-- 			or not UnitAffectingCombat("player")
+		-- 			or ni.unit.buff("player", "Drink")
+		-- 	then
+		-- 		return true;
+		-- 	end
+		-- end,
 
 		["Soulshatter"] = function()
 			if ni.spell.available(spells.soulshatter.id)
@@ -170,27 +217,26 @@ if wotlk then
 			end
 		end,
 		["SeedAOE"] = function()
-			if ni.vars.combat.aoe then
-				if #cache.targets > 3
-						and not cache.moving then
-					for i = 1, #cache.targets do
-						local target = cache.targets[i]
-						-- if ni.player.threat(target.guid) ~= -1 then
-						if not DoubleCast(spells.seed.name, target.name)
-								and ni.spell.available(spells.seed.id)
-								and not ni.unit.debuff(target.guid, spells.seed.id, p)
-						then
-							FacingLosCast(spells.seed.name, target.guid)
-							-- print(spells.seed.name .. " " .. target.name)
-						end
+			if #cache.targets > 1
+					and not cache.moving
+			then
+				for i = 1, #cache.targets do
+					local target = cache.targets[i]
+					-- if ni.player.threat(target.guid) ~= -1 then
+					if not DoubleCast(spells.seed.name, target.guid)
+							and ni.spell.available(spells.seed.id)
+							and not ni.unit.debuff(target.guid, spells.seed.id, p)
+					then
+						FacingLosCast(spells.seed.name, target.guid)
+						-- print(spells.seed.name .. " " .. target.name)
 					end
 				end
 			end
 		end,
 		["CorruptionAOE"] = function()
-			if ni.vars.combat.aoe then
+			if enables["corruptionaoe"] then
 				if #cache.targets > 1
-						and #cache.targets < 4 then
+				then
 					for i = 1, #cache.targets do
 						local target = cache.targets[i]
 						-- if ni.player.threat(target.guid) ~= -1 then
@@ -267,5 +313,23 @@ if wotlk then
 		end
 
 	}
-	ni.bootstrap.profile("Dalvae Affli - Wrath", queue, abilities, onload, onunload)
+	local dynamicqueue = function()
+		if enables["seedaoe"]
+		then
+			return queue2
+		end
+
+		return queue
+	end;
+
+
+	ni.bootstrap.profile("Dalvae Affli - Wrath", dynamicqueue, abilities, onload, onunload)
 end
+-- TooltipDataItemBinding
+
+-- INESTABLE A TODOS
+
+-- al 25 solo poseeer y drenar
+--Si el boss tiene mucha vida aGonya inestable y drenar.
+
+-- Mejorar el haunt
